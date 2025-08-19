@@ -15,17 +15,19 @@ require('./models/index');
 const app = express();
 const PORT = process.env.PORT;
 
-console.log(path.resolve(__dirname, '..', `.${process.env.NODE_ENV}.env`));
-
 app.use(helmet());
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
     credentials: true,
 }));
 app.use(compression({filter: compressionMiddleware}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(fileUpload({}));
+app.use('/static', (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    next()
+}, express.static(process.env.STORAGE_IMAGE_FOLDER));
 app.use('/api', router);
 app.use(errorMiddleware);
 
